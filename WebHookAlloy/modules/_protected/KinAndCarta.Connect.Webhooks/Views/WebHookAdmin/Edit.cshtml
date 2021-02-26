@@ -1,0 +1,190 @@
+﻿@model KinAndCarta.Connect.Webhooks.Models.EditWebhookViewModel
+
+@{
+    Layout = "_Layout.cshtml";
+}
+
+<style>
+    h1 input[type='text'] {
+        font-size: inherit;
+        border: none;
+        background: none;
+        width: 90%;
+    }
+
+    h2 {
+        margin-top: 1.4em;
+    }
+
+    label {
+        display: inline-block;
+    }
+
+    .text-field-wrapper {
+        padding: 0.5em 0;
+    }
+
+    .text-field-wrapper label {
+        font-weight: bold;
+    }
+
+    .text-field-wrapper input {
+        padding: 0.5em;
+        width: 75%;
+    }
+
+    .grid-field-wrapper input {
+        width: 20%;
+        border: solid 1px;
+        padding: 0.5em;
+    }
+
+    .wrapping-label {
+        width: calc(100% - 10px);
+        padding: 10px;
+        margin: 0 1px 1px 0;
+        background: #eee;
+    }
+
+    .wrapping-label:hover {
+        background: #ddd;
+    }
+
+    #tree ul {
+        margin-left: 20px;
+        position: absolute;
+        left: -999999px;
+        left: -200vw;
+    }
+
+    #tree .expanded > ul {
+        position: static;
+    }
+
+    #tree .expanded > .icon {
+        transform: rotate(90deg);
+    }
+
+    #tree span.icon {
+        font-size: 1em;
+        padding: 5px;
+        cursor: pointer;
+        display: inline-block;
+        width: 1em;
+        height: 1em;
+        text-align: center;
+        vertical-align: bottom;
+    }
+
+    #tree input, #DefaultParentPage {
+        position: absolute;
+        left: -999999px;
+        left: -200vw;
+    }
+
+    #tree input:checked + label {
+        background: #eef;
+        font-weight: bold;
+    }
+
+    #tree label {
+        width: auto;
+        padding: 3px;
+    }
+</style>
+
+@using (Html.BeginForm("Edit", "WebhookAdmin", FormMethod.Post))
+{
+    <div class="epi-contentArea">
+        <h1 class="EP-prefix">
+            <span class="epi-iconPen" style="display: inline-block; vertical-align: middle;">&nbsp;</span>
+            @Html.TextBoxFor(m => m.Webhook.Name, new { Placeholder = "Webhook Name Here", required = "required" })
+        </h1>
+    </div>
+    <div class="form-control">
+        <div class="text-field-wrapper">
+            @Html.LabelFor(m => m.Webhook.Url) @Html.TextBoxFor(m => m.Webhook.Url, new { required = "required" })
+        </div>
+        <h2>Custom Headers</h2>
+        <div class="grid-field-wrapper">
+            @Html.TextBoxFor(m => m.Webhook.HeaderKey1, new { placeholder = "key (e.g. x-my-header)" })@Html.TextBoxFor(m => m.Webhook.HeaderVal1, new { placeholder = "value" })
+        </div>
+        <div class="grid-field-wrapper">
+            @Html.TextBoxFor(m => m.Webhook.HeaderKey2, new { placeholder = "key (e.g. x-my-header)" })@Html.TextBoxFor(m => m.Webhook.HeaderVal2, new { placeholder = "value" })
+        </div>
+        <div class="grid-field-wrapper">
+            @Html.TextBoxFor(m => m.Webhook.HeaderKey3, new { placeholder = "key (e.g. x-my-header)" })@Html.TextBoxFor(m => m.Webhook.HeaderVal3, new { placeholder = "value" })
+        </div>
+        <div class="grid-field-wrapper">
+            @Html.TextBoxFor(m => m.Webhook.HeaderKey4, new { placeholder = "key (e.g. x-my-header)" })@Html.TextBoxFor(m => m.Webhook.HeaderVal4, new { placeholder = "value" })
+        </div>
+        <div class="grid-field-wrapper">
+            @Html.TextBoxFor(m => m.Webhook.HeaderKey5, new { placeholder = "key (e.g. x-my-header)" })@Html.TextBoxFor(m => m.Webhook.HeaderVal5, new { placeholder = "value" })
+        </div>
+
+        <h2>Content Types</h2>
+        <div class="types-wrapper" style="column-count: 3; padding-top: 10px;">
+            @foreach (var item in Model.ContentTypes.OrderBy(x => x.Text))
+            {
+                <label class="wrapping-label">
+                    <input type="checkbox"
+                           name="Webhook.ContentTypes"
+                           value="@item.Value"
+                           @if (Model.Webhook.ContentTypes.Any(x => x.ToString().Equals(item.Value))) { <text> checked </text> } /> @item.Text
+                    </label>
+                }
+        </div>
+        <h2>Event Types</h2>
+        <div class="types-wrapper" style="padding-top: 10px; width: 33.3%">
+            @foreach (var item in Model.EventTypes)
+            {
+                <label class="wrapping-label">
+                    <input type="checkbox"
+                           name="Webhook.Events"
+                           value="@item.Value"
+                           @if (Model.Webhook.Events != null && Model.Webhook.Events.Any(x => x.Equals(item.Value))) { <text> checked </text> } /> @item.Text
+                    </label>
+                }
+        </div>
+        <div class="tree-wrapper">
+            <h2>Parent Page: <input type="radio" name="Webhook.ParentId" value="@Model.Webhook.ParentId" id="DefaultParentPage" checked /><span id="DefaultParentName">@Model.CurrentContentName</span></h2>
+            <ul id="tree">
+                <li class="tree-node" data-id="@EPiServer.Core.ContentReference.RootPage.ID"><span class="icon">▶</span><input type="radio" name="Webhook.ParentId" id="content@(EPiServer.Core.ContentReference.RootPage.ID)" value="@EPiServer.Core.ContentReference.RootPage.ID" /><label for="content@(EPiServer.Core.ContentReference.RootPage.ID)">Root</label></li>
+            </ul>
+        </div>
+        <div style="text-align: center;">
+            @Html.HiddenFor(m => m.Webhook.Id)
+            <button data-dojo-type="dijit/form/Button" data-dojo-props="iconClass:'epi-iconCheckmark epi-icon--inverted'" class="epi-primary" type="submit">Save</button>
+            <button data-dojo-type="dijit/form/Button" data-dojo-props="iconClass:'epi-iconStop epi-icon--inverted'" class="epi-danger" type="button" onclick="location.href='@Url.Action("Index")'">Cancel</button>
+        </div>
+    </div>
+}
+
+
+<script>
+    $("#tree").on("click", ".tree-node .icon", function () {
+        var parent = $(this).parent();
+        if (parent.children("ul").length == 0) {
+            $.getJSON("../Tree/?parent=" + parent.data("id"), function (data) {
+                var ul = $("<ul />");
+                if (data.length == 0) {
+                    parent.children(".icon").html("↳").css("transform", "rotate(0deg)");
+                }
+                for (var i = 0; i < data.length; i++) {
+                    ul.append('<li class="tree-node" data-id="' + data[i].id + '"><span class="icon">▶</span><input type="radio" name="Webhook.ParentId" id="content' + data[i].id + '" value="' + data[i].id + '" /><label for="content' + data[i].id + '">' + data[i].name + '</label></li>');
+                }
+                parent.append(ul);
+                if (document.getElementById("DefaultParentPage").checked) {
+                    $("#content@(Model.Webhook.ParentId)").prop("checked", true);
+                }
+            });
+        }
+        parent.toggleClass("expanded");
+    });
+    $(".tree-node .icon").trigger("click");
+    $("#tree").on("change", ".tree-node input", function () {
+        if (this.checked) {
+            $("#DefaultParentName").text($(this).next().text());
+        }
+    });
+</script>

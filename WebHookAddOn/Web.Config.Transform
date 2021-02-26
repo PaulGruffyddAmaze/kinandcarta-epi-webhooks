@@ -1,0 +1,7 @@
+<configuration>
+    <episerver.shell>
+        <protectedModules>
+            <add name="KinAndCarta.Connect.Webhooks" />
+        </protectedModules>
+    </episerver.shell>
+</configuration>

@@ -1,0 +1,87 @@
+﻿@model IEnumerable<KinAndCarta.Connect.Webhooks.Models.Webhook>
+
+@{
+    Layout = "_Layout.cshtml";
+}
+<div class="epi-contentArea">
+    <h1 class="EP-prefix">Manage Webhooks</h1>
+    <p>
+        You can add, update and delete webhooks via the table below.
+    </p>
+</div>
+
+<table role="presentation">
+    <thead class="dgrid-header">
+        <tr>
+            <th role="columnheader">Name</th>
+            <th role="columnheader">Url</th>
+            <th role="columnheader">Actions</th>
+            <th role="columnheader">Last Result</th>
+
+        </tr>
+    </thead>
+    @foreach (var item in Model)
+    {
+        <tr>
+            <td role="gridcell">@item.Name</td>
+            <td role="gridcell" style="text-overflow: ellipsis; max-width: 550px; white-space: nowrap; overflow: hidden;">@item.Url</td>
+            <td role="gridcell">
+                <button data-dojo-type="dijit/form/Button" data-dojo-props="iconClass:'epi-iconPen'" type="button" onclick="location.href = '@Url.Action("Edit")/?guid=@item.Id.ExternalId'">Edit</button>
+                <button data-dojo-type="dijit/form/Button" data-dojo-props="iconClass:'epi-iconPrimary'" type="button" onclick="test('@item.Id.ExternalId')">Test</button>
+                <button data-dojo-type="dijit/form/Button" data-dojo-props="iconClass:'epi-iconTrash epi-icon--inverted'" type="button" class="epi-danger" onclick="if (confirm('Are you sure you want to delete this webhook?\n\nN.B. This action can\'t be undone.')) location.href = '@Url.Action("Delete")/@item.Id.ExternalId';">Delete</button>
+            </td>
+            <td role="gridcell" onclick="ShowFullResponse('@item.Id.ExternalId')">
+                @(item.LastExecuted.Equals(DateTime.MinValue) ? "" : item.LastExecuted.ToShortDateString() + " " + item.LastExecuted.ToLongTimeString() + ": ")
+                @(item.LastResult == null ? "" : item.LastResult.Split('\n').FirstOrDefault())
+                <span style="display: none" id="res@(item.Id.ExternalId)">@Server.HtmlEncode(item.LastResult ?? "").Replace("\n", "<br/>")</span>
+            </td>
+        </tr>
+    }
+</table>
+<br />
+<button data-dojo-type="dijit/form/Button" data-dojo-props="iconClass:'epi-iconPlus'" type="button" onclick="location.href = 'WebhookAdmin/edit/'">New Webhook</button>
+
+<script>
+    function test(webhookId) {
+        $.getJSON("@Url.Action("Test")/" + webhookId, function (data) {
+            if (data.Success) {
+                require(["epi/shell/DialogService"], function (dialogService) {
+                    dialogService.alert({
+                        heading: "Success",
+                        content: data.Response,
+                        description: "",
+                        iconClass: "epi-iconSuccess  epi-icon--colored"
+                    });
+                });
+            } else {
+                require(["epi/shell/DialogService"], function (dialogService) {
+                    dialogService.alert({
+                        heading: "Error",
+                        content: data.Response,
+                        description: "",
+                        iconClass: "epi-iconDanger epi-icon--colored"
+                    });
+                });
+            }
+        }).fail(function (jqxhr, textStatus, error) {
+            var err = textStatus + ", " + error;
+        });
+    }
+
+    function ShowFullResponse(id) {
+        var message = $("#res" + id).html();
+        require(["epi/shell/DialogService"], function (dialogService) {
+            dialogService.alert({
+                heading: "Last Response",
+                content: "",
+                description: htmlDecode(message),
+                iconClass: ".epi-iconInfo epi-icon--colored"
+            });
+        });
+    }
+
+    function htmlDecode(input) {
+        var doc = new DOMParser().parseFromString(input, "text/html");
+        return doc.documentElement.textContent;
+    }
+</script>

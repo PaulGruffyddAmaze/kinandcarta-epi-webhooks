@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30204.135
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WebHookAlloy", "WebHookAlloy\WebHookAlloy.csproj", "{1055D7E3-2FED-48C6-A9B3-E5B2CC9D9D0E}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KinAndCarta.Connect.Webhooks", "WebHookAddOn\KinAndCarta.Connect.Webhooks.csproj", "{21E21579-3C43-486A-8D7E-ED3AB610B23F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{1055D7E3-2FED-48C6-A9B3-E5B2CC9D9D0E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1055D7E3-2FED-48C6-A9B3-E5B2CC9D9D0E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1055D7E3-2FED-48C6-A9B3-E5B2CC9D9D0E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1055D7E3-2FED-48C6-A9B3-E5B2CC9D9D0E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{21E21579-3C43-486A-8D7E-ED3AB610B23F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{21E21579-3C43-486A-8D7E-ED3AB610B23F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{21E21579-3C43-486A-8D7E-ED3AB610B23F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{21E21579-3C43-486A-8D7E-ED3AB610B23F}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {1540CD0B-AA96-405D-90A0-C3DA1BD9C786}
+	EndGlobalSection
+EndGlobal

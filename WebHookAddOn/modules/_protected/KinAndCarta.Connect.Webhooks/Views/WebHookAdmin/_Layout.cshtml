@@ -1,0 +1,75 @@
+﻿@using EPiServer
+@using EPiServer.Framework.Web.Mvc.Html
+@using EPiServer.Framework.Web.Resources
+@using EPiServer.Shell
+@using EPiServer.Shell.Navigation
+@using EPiServer.Shell.Navigation.Internal
+@using EPiServer.Web.PageExtensions
+<!DOCTYPE html>
+
+<html>
+<head>
+    <title>Webhook Admin</title>
+
+    @Html.Raw(EPiServer.Framework.Web.Resources.ClientResources.RenderResources("ShellCore"))
+    @Html.Raw(EPiServer.Framework.Web.Resources.ClientResources.RenderResources("ShellWidgets"))
+    @Html.Raw(EPiServer.Framework.Web.Resources.ClientResources.RenderResources("ShellCoreLightTheme"))
+    @Html.Raw(EPiServer.Framework.Web.Resources.ClientResources.RenderResources("Navigation"))
+    @Html.Raw(EPiServer.Framework.Web.Resources.ClientResources.RenderResources("DojoDashboardCompatibility"))
+    <link href="@EPiServer.Shell.Paths.ToShellClientResource("ClientResources/epi/themes/sleek/sleek.css")" rel="stylesheet">
+
+    <script>
+        dojoConfig = {
+            async: true,
+            parseOnLoad: true,
+            packages: []
+        };
+    </script>
+
+
+    <script type="text/javascript" src="@EPiServer.Shell.Paths.ToShellClientResource("ClientResources/dojo/dojo.js")"></script>
+    <script>
+        require(["dojo/parser", "epi/shell/DialogService"]);
+    </script>
+
+    <script type="text/javascript" src="@EPiServer.Shell.Paths.ToShellClientResource("ClientResources/epi/epi.js")"></script>
+
+    @Html.ScriptResource(UriSupport.ResolveUrlFromUtilBySettings("javascript/episerverscriptmanager.js"))
+    @Html.ScriptResource(UriSupport.ResolveUrlFromUIBySettings("javascript/system.js"))
+    @Html.ScriptResource(UriSupport.ResolveUrlFromUIBySettings("javascript/dialog.js"))
+    @Html.ScriptResource(UriSupport.ResolveUrlFromUIBySettings("javascript/system.aspx"))
+
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
+    <style>
+        table {
+            border: none;
+            width: 100%;
+        }
+
+        th {
+            border-top: 1px solid #000;
+            border-bottom: 1px solid #000;
+        }
+
+        tr:nth-child(even) {
+            background: #ccc;
+        }
+
+        td, th {
+            padding: 5px;
+        }
+    </style>
+</head>
+
+<body class="Sleek" style="position: relative;">
+
+    @Html.Raw(EPiServer.Shell.Navigation.MenuHelper.CreatePlatformNavigationMenu())
+    <div class="epi-navigation--fixed-adjust epi-pn-navigation--fixed-adjust">
+        <div class="epi-padding" style="max-width: 1200px; margin: auto;">
+            @RenderBody()
+        </div>
+    </div>
+</body>
+</html>
