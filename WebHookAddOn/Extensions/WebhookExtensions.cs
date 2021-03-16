@@ -20,8 +20,8 @@ namespace KinAndCarta.Connect.Webhooks.Extensions
 {
     public static class WebhookExtensions
     {
-        private static Lazy<IContentModelMapperFactory> _contentModelMapperFactory = new Lazy<IContentModelMapperFactory>(() => ServiceLocator.Current.GetInstance<IContentModelMapperFactory>());
-        private static Lazy<IContentRepository> _contentRepository = new Lazy<IContentRepository>(() => ServiceLocator.Current.GetInstance<IContentRepository>());
+        private static readonly Lazy<IContentModelMapperFactory> _contentModelMapperFactory = new Lazy<IContentModelMapperFactory>(() => ServiceLocator.Current.GetInstance<IContentModelMapperFactory>());
+        private static readonly Lazy<IContentRepository> _contentRepository = new Lazy<IContentRepository>(() => ServiceLocator.Current.GetInstance<IContentRepository>());
 
         public static WebhookExecutionResponse Execute(this Webhook webhook, IContent content, EventType eventType, IWebhookRepository repo, Dictionary<string, object> extraData = null)
         {
@@ -35,7 +35,7 @@ namespace KinAndCarta.Connect.Webhooks.Extensions
                 payload.Content = mapper.TransformContent(content, false, "*");
                 payload.ExtraData = extraData;
 
-                var url = webhook.Url.ReplacePlaceholders();
+                var url = repo.ReplacePlaceholders(webhook.Url);
                 var uri = new Uri(url);
                 var servicePoint = ServicePointManager.FindServicePoint(uri);
                 servicePoint.Expect100Continue = false;
@@ -44,7 +44,7 @@ namespace KinAndCarta.Connect.Webhooks.Extensions
                     wc.Encoding = Encoding.UTF8;
                     foreach (var header in webhook.Headers ?? new Dictionary<string, string>())
                     {
-                        wc.Headers.Add(header.Key.ReplacePlaceholders(), header.Value.ReplacePlaceholders());
+                        wc.Headers.Add(repo.ReplacePlaceholders(header.Key), repo.ReplacePlaceholders(header.Value));
                     }
                     wc.Headers.Add(HttpRequestHeader.ContentType, "application/json");
                     var response = wc.UploadString(url, "POST", JsonConvert.SerializeObject(payload));
@@ -76,23 +76,6 @@ namespace KinAndCarta.Connect.Webhooks.Extensions
             {
                 HostingEnvironment.QueueBackgroundWorkItem(ct => webhook.Execute(content, eventType, repo, extraData));
             }
-        }
-
-        private static string ReplacePlaceholders(this string originalString)
-        {
-            var rtn = originalString;
-            var tokens = Regex.Matches(rtn, "\\$\\{[a-zA-Z0-9-_:]+\\}");
-            foreach (Match token in tokens)
-            {
-                var key = token.Value.Replace("${", "").Replace("}", "");
-                var val = ConfigurationManager.AppSettings[key];
-                if (val == null)
-                {
-                    continue;
-                }
-                rtn = rtn.Replace(token.Value, val);
-            }
-            return rtn;
         }
     }
 }

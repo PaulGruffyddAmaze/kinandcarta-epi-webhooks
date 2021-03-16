@@ -20,5 +20,7 @@ namespace KinAndCarta.Connect.Webhooks.Data
         void UpdateWebhook(Webhook webhook);
         void RegisterEventType(EventType key);
         IEnumerable<EventType> GetEventTypes();
+        void RegisterPlaceholder(string token, string value);
+        string ReplacePlaceholders(string originalString);
     }
 }

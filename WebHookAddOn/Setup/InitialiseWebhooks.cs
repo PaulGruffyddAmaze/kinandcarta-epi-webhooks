@@ -5,6 +5,7 @@ using EPiServer.Framework.Initialization;
 using EPiServer.ServiceLocation;
 using KinAndCarta.Connect.Webhooks.Data;
 using KinAndCarta.Connect.Webhooks.Extensions;
+using System.Configuration;
 
 namespace KinAndCarta.Connect.Webhooks.Setup
 {
@@ -39,6 +40,16 @@ namespace KinAndCarta.Connect.Webhooks.Setup
             contentEvents.MovingContent += ContentMoving;
             contentEvents.MovedContent += ContentMoved;
             contentEvents.DeletingContent += ContentDeleted;
+
+            //Register Tokens
+            if (ConfigurationManager.AppSettings[Constants.AutoRegisterAppSettingsKey]?.Equals("true", System.StringComparison.InvariantCultureIgnoreCase) ?? false)
+            {
+                foreach (var key in ConfigurationManager.AppSettings.AllKeys)
+                {
+                    _webhookRepo.RegisterPlaceholder(key, ConfigurationManager.AppSettings[key]);
+
+                }
+            }
         }
 
         private void ContentPublished(object sender, ContentEventArgs e)
@@ -48,8 +59,6 @@ namespace KinAndCarta.Connect.Webhooks.Setup
 
         private void ContentMoving(object sender, ContentEventArgs e)
         {
-            var args = e as MoveContentEventArgs;
-
             e.Content.TriggerWebhooks(Constants.MovingEvent, _webhookRepo);
         }
 

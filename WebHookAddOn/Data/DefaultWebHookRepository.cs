@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using EPiServer;
 using EPiServer.Core;
 using EPiServer.Data.Dynamic;
@@ -13,12 +14,14 @@ namespace KinAndCarta.Connect.Webhooks.Data
         private static DynamicDataStoreFactory _dataStoreFactory;
         private static IContentLoader _contentLoader;
         private IEnumerable<EventType> _eventTypes;
+        private readonly Dictionary<string, string> _tokens;
 
         public DefaultWebHookRepository(DynamicDataStoreFactory dataStoreFactory, IContentLoader contentLoader)
         {
             _dataStoreFactory = dataStoreFactory;
             _contentLoader = contentLoader;
             _eventTypes = new List<EventType>();
+            _tokens = new Dictionary<string, string>();
         }
 
         public void SaveWebhook(Webhook webhook)
@@ -94,5 +97,34 @@ namespace KinAndCarta.Connect.Webhooks.Data
         {
             return _eventTypes;
         }
+
+        public void RegisterPlaceholder(string token, string value)
+        {
+            if (_tokens.ContainsKey(token))
+            {
+                _tokens[token] = value;
+            }
+            else
+            {
+                _tokens.Add(token, value);
+            }
+        }
+
+        public string ReplacePlaceholders(string originalString)
+        {
+            var rtn = originalString;
+            var tokens = Regex.Matches(rtn, "\\$\\{[a-zA-Z0-9-_:]+\\}");
+            foreach (Match token in tokens)
+            {
+                var key = token.Value.Substring(2,token.Value.Length - 3);
+                if (!_tokens.ContainsKey(key))
+                {
+                    continue;
+                }
+                rtn = rtn.Replace(token.Value, _tokens[key]);
+            }
+            return rtn;
+        }
+
     }
 }
