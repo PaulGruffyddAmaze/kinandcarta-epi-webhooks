@@ -22,6 +22,7 @@ namespace KinAndCarta.Connect.Webhooks.Extensions
     {
         private static readonly Lazy<IContentModelMapperFactory> _contentModelMapperFactory = new Lazy<IContentModelMapperFactory>(() => ServiceLocator.Current.GetInstance<IContentModelMapperFactory>());
         private static readonly Lazy<IContentRepository> _contentRepository = new Lazy<IContentRepository>(() => ServiceLocator.Current.GetInstance<IContentRepository>());
+        private static readonly int _maxDescendents = int.Parse(ConfigurationManager.AppSettings["WebhookMaxDescendents"] ?? "250");
 
         public static WebhookExecutionResponse Execute(this Webhook webhook, IContent content, EventType eventType, IWebhookRepository repo, Dictionary<string, object> extraData = null)
         {
@@ -31,7 +32,20 @@ namespace KinAndCarta.Connect.Webhooks.Extensions
                 IContentModelMapper mapper = _contentModelMapperFactory.Value.GetMapper(content);
                 var refs = _contentRepository.Value.GetReferencesToContent(content.ContentLink, eventType.ImpactsDescendants);
                 var payload = new WebhookDetailedPayload(content, eventType.Key, DateTime.UtcNow);
-                payload.ReferencedBy = refs.Select(x => new ContentInfo(_contentRepository.Value.Get<IContent>(x.OwnerID, x.OwnerLanguage)));
+                var referencedBy = new List<ContentInfo>();
+                referencedBy.AddRange(refs.Select(x => new ContentInfo(_contentRepository.Value.Get<IContent>(x.OwnerID, x.OwnerLanguage))));
+                if (eventType.ImpactsDescendants)
+                {
+                    var descendents = _contentRepository.Value.GetDescendents(content.ContentLink);
+                    foreach (var descendent in descendents.Take(_maxDescendents))
+                    {
+                        if (!referencedBy.Any(x => x.ContentId.Equals(descendent.ID)))
+                        {
+                            referencedBy.Add(new ContentInfo(_contentRepository.Value.Get<IContent>(descendent)));
+                        }
+                    }
+                }
+                payload.ReferencedBy = referencedBy.GroupBy(x => x.ContentId).Select(x => x.FirstOrDefault());
                 payload.Content = mapper.TransformContent(content, false, "*");
                 payload.ExtraData = extraData;
 
